@@ -8,7 +8,9 @@ const MySwal = withReactContent(Swal);
 class Homepage extends Component {
 	state = {
 		data: [],
-		modalOpen: false
+		modalAddOpen: false,
+		modalEditOpen: false,
+		indexEdit: -1
 	};
 
 	// Component did mount
@@ -29,17 +31,21 @@ class Homepage extends Component {
 		});
 	};
 
-	// Function render todo
+	// Function tampilkan data
 	renderTodo = () => {
 		return this.state.data.map((val, index) => {
 			return (
 				<tr key={index}>
 					<td>{index + 1}</td>
+					<td>{val.tanggal}</td>
 					<td>{val.kegiatan}</td>
 					<td>{val.status ? 'Sudah' : 'Belum'}</td>
-					<td>{val.tanggal}</td>
 					<td>
-						<button className='btn btn-sm btn-warning'>Edit</button>
+						<button
+							className='btn btn-sm btn-warning'
+							onClick={() => this.btnEdit(index)}>
+							Edit
+						</button>
 						<button
 							className='btn btn-sm btn-danger ml-1'
 							onClick={() => this.btnDelete(index)}>
@@ -48,6 +54,53 @@ class Homepage extends Component {
 					</td>
 				</tr>
 			);
+		});
+	};
+
+	// Function modal edit
+	renderEdit = () => {
+		return this.state.data.map((val, index) => {
+			if (this.state.indexEdit === index) {
+				return (
+					<div key={index}>
+						<Modal
+							isOpen={this.state.modalEditOpen}
+							toggle={() => this.setState({ modalEditOpen: false })}>
+							<ModalHeader>Edit Data</ModalHeader>
+							<ModalBody>
+								<div className='form-group'>
+									<label htmlFor='kegiatan'>Kegiatan</label>
+									<input
+										type='text'
+										ref='kegiatan'
+										className='form-control'
+										defaultValue={val.kegiatan}
+									/>
+								</div>
+								<div className='form-group'>
+									<label htmlFor='tanggal'>Tanggal</label>
+									<input
+										type='date'
+										ref='tanggal'
+										className='form-control'
+										defaultValue={val.tanggal}
+									/>
+								</div>
+							</ModalBody>
+							<ModalFooter>
+								<button className='btn btn-sm btn-primary' onClick={this.btnUpdate}>
+									Edit
+								</button>
+								<button
+									className='btn btn-sm btn-secondary'
+									onClick={() => this.setState({ modalEditOpen: false })}>
+									Cancel
+								</button>
+							</ModalFooter>
+						</Modal>
+					</div>
+				);
+			}
 		});
 	};
 
@@ -65,11 +118,17 @@ class Homepage extends Component {
 			MySwal.fire('Cancelled', 'Data tidak boleh kosong!', 'error');
 		} else {
 			let newData = [...this.state.data, obj];
-			this.setState({ data: newData, modalOpen: false });
+			this.setState({ data: newData, modalAddOpen: false });
 			MySwal.fire('Success', 'Data berhasil di tambah!', 'success');
 		}
 	};
 
+	// Function button edit data
+	btnEdit = index => {
+		this.setState({ indexEdit: index, modalEditOpen: true });
+	};
+
+	// Function button delete data
 	btnDelete = index => {
 		MySwal.fire({
 			title: `Apa kamu yakin hapus ${this.state.data[index].kegiatan}?`,
@@ -99,16 +158,17 @@ class Homepage extends Component {
 				<div>
 					<button
 						className='btn btn-sm btn-success rounded mb-5'
-						onClick={() => this.setState({ modalOpen: true })}>
+						onClick={() => this.setState({ modalAddOpen: true })}>
 						Tambah Data
 					</button>
 				</div>
 
 				<div>
+					{this.renderEdit()}
 					<Modal
-						isOpen={this.state.modalOpen}
-						toggle={() => this.setState({ modalOpen: false })}>
-						<ModalHeader>Tambah Data</ModalHeader>
+						isOpen={this.state.modalAddOpen}
+						toggle={() => this.setState({ modalAddOpen: false })}>
+						<ModalHeader>Add Data</ModalHeader>
 						<ModalBody>
 							<div className='form-group'>
 								<label htmlFor='kegiatan'>Kegiatan</label>
@@ -120,19 +180,19 @@ class Homepage extends Component {
 							</div>
 						</ModalBody>
 						<ModalFooter>
-							<button className='btn btn-sm btn-primary' onClick={this.btnAdd}>
+							<button className='btn btn-sm btn-primary' onClick={this.btnEdit}>
 								Add
 							</button>
 							<button
 								className='btn btn-sm btn-secondary'
-								onClick={() => this.setState({ modalOpen: false })}>
+								onClick={() => this.setState({ modalAddOpen: false })}>
 								Cancel
 							</button>
 						</ModalFooter>
 					</Modal>
 				</div>
 
-				<Table striped>
+				<Table striped style={{ textAlign: 'center' }}>
 					<thead>
 						<tr>
 							<th>No</th>
