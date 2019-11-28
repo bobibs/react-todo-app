@@ -157,11 +157,26 @@ class Homepage extends Component {
 		if (kegiatan === '' || tanggal === '' || status === '') {
 			MySwal.fire('Cancelled', 'Data tidak boleh kosong!', 'error');
 		} else {
-			let data = this.state.data;
-			data.splice([this.state.indexEdit], 1, obj);
-			this.setState({ data, modalEditOpen: false });
-			MySwal.fire('Success', 'Data berhasil di update!', 'success');
-			console.log(data);
+			MySwal.fire({
+				title: `Apa kamu yakin update data ini?`,
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Update',
+				cancelButtonText: 'Tidak',
+				reverseButtons: true
+			}).then(result => {
+				if (result.value) {
+					let data = this.state.data;
+					data.splice([this.state.indexEdit], 1, obj);
+					this.setState({ data, modalEditOpen: false });
+					MySwal.fire('Success', 'Data berhasil di update!', 'success');
+				} else if (
+					/* Read more about handling dismissals below */
+					result.dismiss === Swal.DismissReason.cancel
+				) {
+					MySwal.fire('Cancelled', 'Data tidak gagal di update!', 'error');
+				}
+			});
 		}
 	};
 
@@ -172,7 +187,7 @@ class Homepage extends Component {
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonText: 'Hapus',
-			cancelButtonText: 'Cancel',
+			cancelButtonText: 'Tidak',
 			reverseButtons: true
 		}).then(result => {
 			if (result.value) {
