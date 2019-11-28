@@ -19,16 +19,21 @@ class Homepage extends Component {
 			data: [
 				{
 					kegiatan: 'Lari',
-					status: true,
+					status: 'Sudah',
 					tanggal: '2019-11-25'
 				},
 				{
 					kegiatan: 'Sarapan',
-					status: false,
+					status: 'Belum',
 					tanggal: '2019-11-26'
 				}
 			]
 		});
+	};
+
+	// Function edit change
+	editChange = e => {
+		this.setState({ status: e.target.value });
 	};
 
 	// Function tampilkan data
@@ -39,7 +44,7 @@ class Homepage extends Component {
 					<td>{index + 1}</td>
 					<td>{val.tanggal}</td>
 					<td>{val.kegiatan}</td>
-					<td>{val.status ? 'Sudah' : 'Belum'}</td>
+					<td>{val.status}</td>
 					<td>
 						<button
 							className='btn btn-sm btn-warning'
@@ -86,6 +91,16 @@ class Homepage extends Component {
 										defaultValue={val.tanggal}
 									/>
 								</div>
+								<div className='form-group'>
+									<label htmlFor='status'>Status</label>
+									<select
+										className='form-control'
+										ref='status'
+										defaultValue={val.status}>
+										<option value='Belum'>Belum</option>
+										<option value='Sudah'>Sudah</option>
+									</select>
+								</div>
 							</ModalBody>
 							<ModalFooter>
 								<button className='btn btn-sm btn-primary' onClick={this.btnUpdate}>
@@ -110,7 +125,7 @@ class Homepage extends Component {
 		let tanggal = this.refs.tanggal.value;
 		let obj = {
 			kegiatan,
-			status: false,
+			status: 'Belum',
 			tanggal
 		};
 
@@ -126,6 +141,28 @@ class Homepage extends Component {
 	// Function button edit data
 	btnEdit = index => {
 		this.setState({ indexEdit: index, modalEditOpen: true });
+	};
+
+	// Function button update data
+	btnUpdate = index => {
+		let kegiatan = this.refs.kegiatan.value;
+		let status = this.refs.status.value;
+		let tanggal = this.refs.tanggal.value;
+		let obj = {
+			kegiatan,
+			status,
+			tanggal
+		};
+
+		if (kegiatan === '' || tanggal === '' || status === '') {
+			MySwal.fire('Cancelled', 'Data tidak boleh kosong!', 'error');
+		} else {
+			let data = this.state.data;
+			data.splice([this.state.indexEdit], 1, obj);
+			this.setState({ data, modalEditOpen: false });
+			MySwal.fire('Success', 'Data berhasil di update!', 'success');
+			console.log(data);
+		}
 	};
 
 	// Function button delete data
@@ -163,8 +200,9 @@ class Homepage extends Component {
 					</button>
 				</div>
 
+				<div>{this.renderEdit()}</div>
+
 				<div>
-					{this.renderEdit()}
 					<Modal
 						isOpen={this.state.modalAddOpen}
 						toggle={() => this.setState({ modalAddOpen: false })}>
@@ -180,7 +218,7 @@ class Homepage extends Component {
 							</div>
 						</ModalBody>
 						<ModalFooter>
-							<button className='btn btn-sm btn-primary' onClick={this.btnEdit}>
+							<button className='btn btn-sm btn-primary' onClick={this.btnAdd}>
 								Add
 							</button>
 							<button
